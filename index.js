@@ -1,51 +1,30 @@
+require('./mongoose')
 const express = require ('express')
 const cors = require('cors')
 const app = express()
-let {clients} = require('./clients')
 const { finalError, logger } = require('./Middlewares/logger')
-
+const userRouter = require('./controllers/Users')
+const loginRouter = require('./controllers/login')
+const clientRouter = require('./controllers/Clients')
+const taskRouter = require('./controllers/Tasks')
+const printerRouter = require('./controllers/Printers')
+const extrucionRouter = require('./controllers/Extrucions')
 app.use(cors())
 app.use(express.json())
-
-
 app.use(logger)
 
-app.get('/', (req, res) => {
-    res.send('<h1>Hola mundo</h1>')
-})
+app.use('/api/task', taskRouter)
 
-app.get('/clients', (req, res) => {
-    res.send(clients)
-})
+app.use('/api/users', userRouter)
 
-app.get('/api/client/:id' , (req, res) => {
-    const id = Number(req.params.id)
-    const client = clients.find( client => client.id === id)
-    res.json(client)
-})
+app.use('/api/login' , loginRouter)
 
-app.delete('/api/client/:id' , (req, res) => {
-    const id = Number(req.params.id)
-    clients = clients.filter(client => client.id !== id)
-    res.status(204).end()
-})
+app.use('/api/client', clientRouter)
 
-app.post('/api/clientPost' , (req, res) => {
-    const client = req.body
-    const ids = clients.map( client => client.id )
-    const maxId = Math.max(...ids)
-    const newClient = {
-        id: maxId + 1,
-        content : client.content,
-        important : client.important || false,
-        date : new Date().toISOString()
-    }
+app.use('/api/printer', printerRouter)
 
-    clients =  [...clients, newClient]
-    res.json(newClient)
-})
+app.use('/api/extrucion', extrucionRouter)
 
 app.use(finalError)
-
 
 app.listen(3001, () => {console.log('3001')})
