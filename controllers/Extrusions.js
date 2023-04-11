@@ -1,20 +1,19 @@
-const extrucionRouter = require('express').Router()
+const extrusionRouter = require('express').Router()
 const User = require('../models/User')
 const jwt = require('jsonwebtoken')
-const Printer = require('../models/Printer')
-const Extrucion = require('../models/Extrucion')
+const Extrusion = require('../models/Extrusion')
 
-extrucionRouter.get('/', async(req, res) => {
-    const extrucion = await Extrucion.find({})
+extrusionRouter.get('/', async(req, res) => {
+    const extrusion = await Extrusion.find({})
 
-    if(!extrucion){
+    if(!extrusion){
         return res.status(404).json({
             error : 'no hay extrucion'
         })
     }
-    res.json(extrucion)
+    res.json(extrusion)
 })
-extrucionRouter.post('/' , async (req, res) => {
+extrusionRouter.post('/' , async (req, res) => {
     
     const {
         important = false,
@@ -64,7 +63,13 @@ extrucionRouter.post('/' , async (req, res) => {
         })
     }
 
-    const newExtrucion = new Extrucion({ 
+    const date = new Date()
+    const day = date.getDate()
+    const month = date.getMonth() + 1
+    const year = date.getFullYear()
+    const finishDate = `${day}/${month}/${ year }`
+
+    const newExtrusion = new Extrusion({ 
         important,
         state,
         material,
@@ -72,74 +77,76 @@ extrucionRouter.post('/' , async (req, res) => {
         tratado,
         weight,
         meters,
-        client 
+        client,
+        date : finishDate
     })
 
-    const allExtrucions = await Extrucion.find({})
 
     try {
-        await newExtrucion.save()
+        await newExtrusion.save()
 
-        res.json(allExtrucions)
+        const allExtrusions = await Extrusion.find({})
+
+        res.json(allExtrusions)
 
     } catch (error) {
         console.log(error)
     }
 })
-extrucionRouter.delete('/:id', async(req, res) => {
+extrusionRouter.delete('/:id', async(req, res) => {
 
     const { id } = req.params
 
-    const extrucion = await Extrucion.findByIdAndDelete(id)
+    const extrusion = await Extrusion.findByIdAndDelete(id)
 
-    if(!extrucion){
+    if(!extrusion){
+        return res.status(404).json({
+            error : 'No existe esa tarea de extrusion'
+        })
+    }
+
+    const allExtrusions = await Extrusion.find({})
+
+    res.json(allExtrusions)
+})
+extrusionRouter.patch('/stateT/:id', async(req, res) => {
+
+    const { id } = req.params
+
+    const extrusion = await Extrusion.findById(id)
+
+    if(!extrusion){
         return res.status(404).json({
             error : 'No existe esa tarea'
         })
     }
 
-    const allExtrucions = await Extrucion.find({})
+    extrusion.state = true
 
-    res.json(allExtrucions)
+    await extrusion.save()
+
+    const allExtrusion = await Extrusion.find({})
+
+    res.json(allExtrusion)
 })
-extrucionRouter.patch('/stateT/:id', async(req, res) => {
+extrusionRouter.patch('/stateF/:id', async(req, res) => {
 
     const { id } = req.params
 
-    const printer = await Printer.findById(id)
+    const extrusion = await Extrusion.findById(id)
 
-    if(!printer){
+    if(!extrusion){
         return res.status(404).json({
             error : 'No existe esa tarea'
         })
     }
 
-    printer.state = true
+    extrusion.state = false
 
-    await printer.save()
+    await extrusion.save()
 
-    const allPrinters = await Printer.find({})
+    const allExtrusion = await Extrusion.find({})
 
-    res.json(allPrinters)
+    res.json(allExtrusion)
 })
-extrucionRouter.patch('/stateF/:id', async(req, res) => {
-
-    const { id } = req.params
-
-    const printer = await Printer.findById(id)
-
-    if(!printer){
-        return res.status(404).json({
-            error : 'No existe esa tarea'
-        })
-    }
-
-    printer.state = false
-
-    await printer.save()
-
-    const allPrinters = await Printer.find({})
-
-    res.json(allPrinters)
-})
-module.exports = extrucionRouter
+module.exports = extrusionRouter

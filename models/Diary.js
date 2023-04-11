@@ -1,24 +1,21 @@
 const mongoose = require('mongoose')
 const {Schema, model} = mongoose
 
-const extrucionSchema = new Schema({
+const diarySchema = new Schema({
     important: Boolean,
-    material: String,
-    size: String,
-    tratado: String,
     state : Boolean,
-    weight : String,
-    meters : String,
-    client : String
+    text: String,
+    date: String
 })
 
-extrucionSchema.set('toJSON', {
+diarySchema.set('toJSON', {
     transform: (document, returnedObject) => {
         returnedObject.id = returnedObject._id,
         delete returnedObject._id,
         delete returnedObject.__v
     }
 })
-const Extrucion = model('Extrucion', extrucionSchema)
 
-module.exports = Extrucion
+const Diary = model('Diary', diarySchema)
+
+module.exports = Diary

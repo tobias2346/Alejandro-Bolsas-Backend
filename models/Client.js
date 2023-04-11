@@ -4,9 +4,6 @@ const {Schema, model} = mongoose
 const clientSchema = new Schema({
     title : String,
     important: Boolean,
-    material: String,
-    size: String,
-    colors: String,
     user: String,
     tasks : [{
         date: String,
@@ -16,9 +13,12 @@ const clientSchema = new Schema({
         colors: String,
         heads: String,
         state : Boolean,
+        stateAcount: Boolean, 
         weight : String,
         meters : String,
-        client : String
+        client : String,
+        tratado : String,
+        cuenta : Number
     }]
 })
 

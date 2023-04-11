@@ -69,13 +69,10 @@ clientRouter.post('/' , async (req, res) => {
     
     const {
         title, 
-        important = false,
-        material,
-        size,
-        colors
+        important = false
     } = req.body
 
-    if( !title || !material || !size || !colors ){
+    if(!title){
         return res.status(400).json({
             error : 'Faltan datos para ingresar un nuevo cliente'
         })
@@ -116,9 +113,6 @@ clientRouter.post('/' , async (req, res) => {
         title,
         important,
         date: new Date(),
-        material,
-        size,
-        colors,
         user: user.id
     })
 

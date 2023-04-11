@@ -1,35 +1,33 @@
-const printerRouter = require('express').Router()
+const cutRouter = require('express').Router()
 const User = require('../models/User')
 const jwt = require('jsonwebtoken')
-const Printer = require('../models/Printer')
+const Cut = require('../models/Cut')
 
-printerRouter.get('/', async(req, res) => {
-    const printer = await Printer.find({})
+cutRouter.get('/', async(req, res) => {
 
-    if(!printer){
+    const cut = await Cut.find({})
+
+    if(!cut){
         return res.status(404).json({
-            error : 'no hay impresion'
+            error : 'no hay extrucion'
         })
     }
-    res.json(printer)
+    res.json(cut)
 })
-printerRouter.post('/' , async (req, res) => {
+cutRouter.post('/' , async (req, res) => {
     
     const {
         important = false,
         state = false,
         material,
-        heads,
-        meters,
-        weight,
         size,
-        colors,
-        client
+        client,
+        quantity,
     } = req.body
 
-    if(!material || !size || !colors || !heads || !meters || !client){
+    if(!material || !size || !quantity || !client){
         return res.status(400).json({
-            error : 'Faltan datos para ingresar un nuevo cliente'
+            error : 'Faltan datos para ingresar un nuevo trabajo de extrucion'
         })
     }
 
@@ -63,91 +61,89 @@ printerRouter.post('/' , async (req, res) => {
             error: 'Usuario inexistente' 
         })
     }
+
     const date = new Date()
     const day = date.getDate()
     const month = date.getMonth() + 1
     const year = date.getFullYear()
     const finishDate = `${day}/${month}/${ year }`
 
-
-    const newPrinter = new Printer({ 
+    const newCut = new Cut({ 
         important,
         state,
-        date: finishDate,
         material,
         size,
-        colors,
-        heads,
-        weight,
-        meters,
-        client 
+        client,
+        quantity,
+        date : finishDate
     })
 
-    const allPrinters = await Printer.find({})
 
     try {
-        await newPrinter.save()
+        await newCut.save()
 
-        res.json(allPrinters)
+        const allCuts = await Cut.find({})
+
+        res.json(allCuts)
 
     } catch (error) {
         console.log(error)
     }
 })
-printerRouter.delete('/:id', async(req, res) => {
+cutRouter.delete('/:id', async(req, res) => {
 
     const { id } = req.params
 
-    const printer = await Printer.findByIdAndDelete(id)
+    const cut = await Cut.findByIdAndDelete(id)
 
-    if(!printer){
+    if(!cut){
+        return res.status(404).json({
+            error : 'No existe esa tarea de extrusion'
+        })
+    }
+
+    const allCuts = await Cut.find({})
+
+    res.json(allCuts)
+})
+cutRouter.patch('/stateT/:id', async(req, res) => {
+
+    const { id } = req.params
+
+    const cut = await Cut.findById(id)
+
+    if(!cut){
         return res.status(404).json({
             error : 'No existe esa tarea'
         })
     }
 
-    const allPrinters = await Printer.find({})
+    cut.state = true
 
-    res.json(allPrinters)
+    await cut.save()
+
+    const allCuts = await Cut.find({})
+
+    res.json(allCuts)
 })
-printerRouter.patch('/stateT/:id', async(req, res) => {
+cutRouter.patch('/stateF/:id', async(req, res) => {
 
     const { id } = req.params
 
-    const printer = await Printer.findById(id)
+    const cut = await Cut.findById(id)
 
-    if(!printer){
+    if(!cut){
         return res.status(404).json({
             error : 'No existe esa tarea'
         })
     }
 
-    printer.state = true
+    cut.state = false
 
-    await printer.save()
+    await cut.save()
 
-    const allPrinters = await Printer.find({})
+    const allCuts = await Cut.find({})
 
-    res.json(allPrinters)
+    res.json(allCuts)
 })
-printerRouter.patch('/stateF/:id', async(req, res) => {
-
-    const { id } = req.params
-
-    const printer = await Printer.findById(id)
-
-    if(!printer){
-        return res.status(404).json({
-            error : 'No existe esa tarea'
-        })
-    }
-
-    printer.state = false
-
-    await printer.save()
-
-    const allPrinters = await Printer.find({})
-
-    res.json(allPrinters)
-})
-module.exports = printerRouter
+module.exports = cutRouter

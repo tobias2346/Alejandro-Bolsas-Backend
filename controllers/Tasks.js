@@ -23,44 +23,52 @@ taskRouter.patch('/:id', async(req, res) => {
     const {
         important = false,
         state = false ,
+        stateAcount = false,
         material,
         size,
         colors,
         heads,
         weight,
-        meters 
+        meters,
+        cuenta,
+        tratado,
+        client
     } = req.body
 
-    const client = await Client.findById(id)
+    const existClient = await Client.findById(id)
 
-    if(!client){
+    if(!existClient){
         res.status(404).json({
             error : 'Cliente inexistente'
         })
     }
-    if( !material || !size || !colors || !heads || !weight || !meters ){
+    if( !material || !size || !colors || !meters || !cuenta ){
         return res.status(400).json({
-            error : 'Todos los campos son obligatorios'
+            error : 'Algunos campos son obligatorios'
         })
     }
-
     const date = new Date()
-    const day = date.getDay()
+    const day = date.getDate()
     const month = date.getMonth() + 1
     const year = date.getFullYear()
     const finishDate = `${day}/${month}/${ year }`
+  
 
     await Client.findByIdAndUpdate(id,
         {   tasks : [{ 
             important,
             date : finishDate,
             state,
+            stateAcount,
             material,
             size,
             colors,
             heads,
             weight,
-            meters },...client.tasks]
+            cuenta,
+            tratado,
+            client,
+            meters },...existClient.tasks]
         }
         
     )
@@ -68,6 +76,42 @@ taskRouter.patch('/:id', async(req, res) => {
     const updateClients = await Client.findById(id)
 
 
+
+    res.json(updateClients.tasks)
+})
+taskRouter.patch('/discount/:id', async(req, res) => {
+
+    const {id} = req.params
+
+    const {
+        stateAcount = true,
+        cuenta
+    } = req.body
+
+    const date = new Date()
+    const day = date.getDate()
+    const month = date.getMonth() + 1
+    const year = date.getFullYear()
+    const finishDate = `${day}/${month}/${ year }`
+  
+
+    const existClient = await Client.findById(id)
+
+    if(!existClient){
+        res.status(404).json({
+            error : 'Cliente inexistente'
+        })
+    }
+    await Client.findByIdAndUpdate(id,
+        {   tasks : [{ 
+            stateAcount,
+            date : finishDate,
+            cuenta},...existClient.tasks]
+        }
+        
+    )
+
+    const updateClients = await Client.findById(id)
 
     res.json(updateClients.tasks)
 })
