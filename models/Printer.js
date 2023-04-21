@@ -10,7 +10,8 @@ const printerSchema = new Schema({
     state : Boolean,
     weight : String,
     meters : String,
-    client : String
+    client : String,
+    date: String
 })
 
 printerSchema.set('toJSON', {

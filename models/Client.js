@@ -30,6 +30,6 @@ clientSchema.set('toJSON', {
     }
 })
 
-const Client = model('Client', clientSchema)  
-
+const Client = model('Client', clientSchema)
+  
 module.exports = Client 

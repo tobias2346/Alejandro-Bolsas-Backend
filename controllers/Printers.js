@@ -1,7 +1,6 @@
 const printerRouter = require('express').Router()
-const User = require('../models/User')
-const jwt = require('jsonwebtoken')
 const Printer = require('../models/Printer')
+const { validarJWT } = require('../Middlewares/validar-jwt')
 
 printerRouter.get('/', async(req, res) => {
     const printer = await Printer.find({})
@@ -13,7 +12,7 @@ printerRouter.get('/', async(req, res) => {
     }
     res.json(printer)
 })
-printerRouter.post('/' , async (req, res) => {
+printerRouter.post('/' ,[validarJWT], async (req, res) => {
     
     const {
         important = false,
@@ -27,40 +26,9 @@ printerRouter.post('/' , async (req, res) => {
         client
     } = req.body
 
-    if(!material || !size || !colors || !heads || !meters || !client){
-        return res.status(400).json({
-            error : 'Faltan datos para ingresar un nuevo cliente'
-        })
-    }
-
-    const authorization = req.get('authorization')
-
-    let token = ''
-    if(authorization && authorization.toLowerCase().startsWith('bearer')){
-        token = authorization.substring(7)
-    }
-
-    let decodedToken = {} 
-
-    try {
-        decodedToken = jwt.verify(token, '123')
-    } catch (e) {
-        console.log(e)
-    }
-
-    if(!token || !decodedToken.id){
-        return res.status(401).json({
-            error: 'no autorizado' 
-        })
-    }
-    
-    let {id: userId} = decodedToken
-    
-    const user = await User.findById(userId)
-
-    if(!user){
+    if(!client || !heads || !meters || !material || !size || !colors){
         return res.status(404).json({
-            error: 'Usuario inexistente' 
+            error : 'Algunos campos son obligatorios'
         })
     }
     const date = new Date()
@@ -83,10 +51,11 @@ printerRouter.post('/' , async (req, res) => {
         client 
     })
 
-    const allPrinters = await Printer.find({})
 
     try {
         await newPrinter.save()
+
+        const allPrinters = await Printer.find({})
 
         res.json(allPrinters)
 

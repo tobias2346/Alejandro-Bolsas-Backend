@@ -1,4 +1,5 @@
 const clientRouter = require('express').Router()
+const { validarJWT } = require('../Middlewares/validar-jwt')
 const Client = require('../models/Client')
 const User = require('../models/User')
 const jwt = require('jsonwebtoken')
@@ -65,7 +66,7 @@ clientRouter.get('/:id' ,async(req, res) => {
 
     res.json(client)
 })
-clientRouter.post('/' , async (req, res) => {
+clientRouter.post('/' ,[validarJWT], async (req, res) => {
     
     const {
         title, 

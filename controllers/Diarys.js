@@ -1,7 +1,6 @@
 const diaryRouter = require('express').Router()
-const User = require('../models/User')
-const jwt = require('jsonwebtoken')
 const Diary = require('../models/Diary')
+const { validarJWT } = require('../Middlewares/validar-jwt')
 
 diaryRouter.get('/', async(req, res) => {
 
@@ -14,50 +13,18 @@ diaryRouter.get('/', async(req, res) => {
     }
     res.json(diary)
 })
-diaryRouter.post('/' , async (req, res) => {
+diaryRouter.post('/' ,[validarJWT], async (req, res) => {
     
     const {
         important = false,
         text,
     } = req.body
-
+   
     if(!text){
-        return res.status(400).json({
-            error : 'Faltan datos para ingresar un nuevo trabajo de extrucion'
-        })
-    }
-
-    const authorization = req.get('authorization')
-
-    let token = ''
-    if(authorization && authorization.toLowerCase().startsWith('bearer')){
-        token = authorization.substring(7)
-    }
-
-    let decodedToken = {} 
-
-    try {
-        decodedToken = jwt.verify(token, '123')
-    } catch (e) {
-        console.log(e)
-    }
-
-    if(!token || !decodedToken.id){
-        return res.status(401).json({
-            error: 'no autorizado' 
-        })
-    }
-    
-    let {id: userId} = decodedToken
-    
-    const user = await User.findById(userId)
-
-    if(!user){
         return res.status(404).json({
-            error: 'Usuario inexistente' 
+            error : 'Algunos campos son obligatorios'
         })
     }
-
     const date = new Date()
     const day = date.getDate()
     const month = date.getMonth() + 1

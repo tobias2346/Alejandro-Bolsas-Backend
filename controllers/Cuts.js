@@ -1,7 +1,6 @@
 const cutRouter = require('express').Router()
-const User = require('../models/User')
-const jwt = require('jsonwebtoken')
 const Cut = require('../models/Cut')
+const { validarJWT } = require('../Middlewares/validar-jwt')
 
 cutRouter.get('/', async(req, res) => {
 
@@ -14,7 +13,7 @@ cutRouter.get('/', async(req, res) => {
     }
     res.json(cut)
 })
-cutRouter.post('/' , async (req, res) => {
+cutRouter.post('/' ,[validarJWT], async (req, res) => {
     
     const {
         important = false,
@@ -25,43 +24,11 @@ cutRouter.post('/' , async (req, res) => {
         quantity,
     } = req.body
 
-    if(!material || !size || !quantity || !client){
-        return res.status(400).json({
-            error : 'Faltan datos para ingresar un nuevo trabajo de extrucion'
-        })
-    }
-
-    const authorization = req.get('authorization')
-
-    let token = ''
-    if(authorization && authorization.toLowerCase().startsWith('bearer')){
-        token = authorization.substring(7)
-    }
-
-    let decodedToken = {} 
-
-    try {
-        decodedToken = jwt.verify(token, '123')
-    } catch (e) {
-        console.log(e)
-    }
-
-    if(!token || !decodedToken.id){
-        return res.status(401).json({
-            error: 'no autorizado' 
-        })
-    }
-    
-    let {id: userId} = decodedToken
-    
-    const user = await User.findById(userId)
-
-    if(!user){
+    if(!client || !quantity || !material || !size){
         return res.status(404).json({
-            error: 'Usuario inexistente' 
+            error : 'Algunos campos son obligatorios'
         })
     }
-
     const date = new Date()
     const day = date.getDate()
     const month = date.getMonth() + 1

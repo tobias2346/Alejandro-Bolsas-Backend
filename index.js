@@ -31,9 +31,6 @@ app.use('/api/cut', cutRouter)
 
 app.use('/api/diary', diaryRouter)
 
-
-
-
 app.use(finalError)
 
 app.listen(3001, () => {console.log('3001')})

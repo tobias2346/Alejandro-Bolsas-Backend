@@ -17,7 +17,6 @@ taskRouter.get('/:id' , async(req, res) => {
 
 })
 taskRouter.patch('/:id', async(req, res) => {
-
     const {id} = req.params
 
     const {
@@ -34,6 +33,17 @@ taskRouter.patch('/:id', async(req, res) => {
         tratado,
         client
     } = req.body
+    
+    if(isNaN(cuenta)){
+        return res.status(404).json({
+            error : 'La cuenta tiene que ser un numero'
+        })
+    }
+    if( !client || !material || !size || !meters || !cuenta){
+        return res.status(404).json({
+            error : 'Algunos campos son obligatorios'
+        })
+    }
 
     const existClient = await Client.findById(id)
 
@@ -42,11 +52,8 @@ taskRouter.patch('/:id', async(req, res) => {
             error : 'Cliente inexistente'
         })
     }
-    if( !material || !size || !colors || !meters || !cuenta ){
-        return res.status(400).json({
-            error : 'Algunos campos son obligatorios'
-        })
-    }
+
+
     const date = new Date()
     const day = date.getDate()
     const month = date.getMonth() + 1
@@ -88,12 +95,17 @@ taskRouter.patch('/discount/:id', async(req, res) => {
         cuenta
     } = req.body
 
+    if(isNaN(cuenta)){
+        return res.status(404).json({
+            error : 'La cuenta tiene que ser un numero'
+        })
+    }
+
     const date = new Date()
     const day = date.getDate()
     const month = date.getMonth() + 1
     const year = date.getFullYear()
     const finishDate = `${day}/${month}/${ year }`
-  
 
     const existClient = await Client.findById(id)
 
@@ -108,9 +120,7 @@ taskRouter.patch('/discount/:id', async(req, res) => {
             date : finishDate,
             cuenta},...existClient.tasks]
         }
-        
     )
-
     const updateClients = await Client.findById(id)
 
     res.json(updateClients.tasks)
@@ -174,8 +184,3 @@ taskRouter.patch('/delete/:clientId/:i', async(req, res) => {
  
 })
 module.exports = taskRouter
-
-
-
-
-

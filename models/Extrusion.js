@@ -10,7 +10,7 @@ const extrusionSchema = new Schema({
     weight : String,
     meters : String,
     client : String,
-    date: String,
+    date: String
 })
 
 extrusionSchema.set('toJSON', {
