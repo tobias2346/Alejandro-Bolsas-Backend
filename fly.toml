@@ -1,0 +1,8 @@
+app = "Alejandro-Bolsas-Backend"
+
+[[services]]
+internal_port = 3001
+protocol = "tcp"
+
+[experimental]
+allowed_public_ports = [80, 443]
