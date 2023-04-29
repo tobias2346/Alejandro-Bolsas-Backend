@@ -1,7 +1,7 @@
 const extrusionRouter = require('express').Router()
 const { validarJWT } = require('../Middlewares/validar-jwt')
+const Client = require('../models/Client')
 const Extrusion = require('../models/Extrusion')
-
 
 extrusionRouter.get('/', async(req, res) => {
     const extrusion = await Extrusion.find({})
@@ -26,11 +26,6 @@ extrusionRouter.post('/' ,[validarJWT], async (req, res) => {
         client
     } = req.body
 
-    if(!client || !material || !tratado || !weight || !size){
-        return res.status(404).json({
-            error : 'Algunos campos son obligatorios'
-        })
-    }
 
     const date = new Date()
     const day = date.getDate()
@@ -61,6 +56,72 @@ extrusionRouter.post('/' ,[validarJWT], async (req, res) => {
     } catch (error) {
         console.log(error)
     }
+})
+
+extrusionRouter.patch('/:id', async(req, res) => {
+    const {id} = req.params
+
+    const {
+        important = false,
+        state = false ,
+        stateAcount = false,
+        isPrinter = false,
+        isExtrusion = true,
+        isDiary = false,
+        material,
+        size,
+        colors,
+        heads,
+        weight,
+        meters,
+        cuenta,
+        tratado,
+        client
+    } = req.body
+    
+    if(isNaN(cuenta)){
+        return res.status(404).json({
+            error : 'La cuenta tiene que ser un numero'
+        })
+    }
+
+
+    const existClient = await Client.findById(id)
+
+    if(!existClient){
+        res.status(404).json({
+            error : 'Cliente inexistente'
+        })
+    }
+
+    const date = new Date()
+    const day = date.getDate()
+    const month = date.getMonth() + 1
+    const year = date.getFullYear()
+    const finishDate = `${day}/${month}/${ year }`
+
+    await Client.findByIdAndUpdate(id,
+        {   tasks : [{ 
+            important,
+            date : finishDate,
+            state,
+            stateAcount,
+            isPrinter,
+            isExtrusion,
+            isDiary,
+            material,
+            size,
+            colors,
+            heads,
+            weight,
+            cuenta,
+            tratado,
+            client,
+            meters },...existClient.tasks]
+        } 
+    )
+    const updateClients = await Client.findById(id)
+    res.json(updateClients.tasks)
 })
 extrusionRouter.delete('/:id', async(req, res) => {
 

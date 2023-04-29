@@ -7,7 +7,7 @@ const logger = (req, res, next) => {
 const finalError = (req, res) => {
     console.log(req.path)
     res.status(404).json({
-        error: 'Request not found'
+        error: 'Url no encontrada'
     })
 }
 
