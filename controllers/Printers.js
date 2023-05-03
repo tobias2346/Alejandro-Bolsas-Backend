@@ -2,6 +2,7 @@ const printerRouter = require('express').Router()
 const Printer = require('../models/Printer')
 const { validarJWT } = require('../Middlewares/validar-jwt')
 const Client = require('../models/Client')
+
 printerRouter.get('/', async(req, res) => {
     const printer = await Printer.find({})
 
@@ -79,72 +80,6 @@ printerRouter.delete('/:id', async(req, res) => {
 
     res.json(allPrinters)
 })
-
-printerRouter.patch('/:id', async(req, res) => {
-    const {id} = req.params
-
-    const {
-        important = false,
-        state = false ,
-        stateAcount = false,
-        isPrinter = true,
-        isExtrusion = false,
-        isDiary = false,
-        material,
-        size,
-        colors,
-        heads,
-        weight,
-        meters,
-        cuenta,
-        tratado,
-        client
-    } = req.body
-    
-    if(isNaN(cuenta)){
-        return res.status(404).json({
-            error : 'La cuenta tiene que ser un numero'
-        })
-    }
-
-
-    const existClient = await Client.findById(id)
-
-    if(!existClient){
-        res.status(404).json({
-            error : 'Cliente inexistente'
-        })
-    }
-
-    const date = new Date()
-    const day = date.getDate()
-    const month = date.getMonth() + 1
-    const year = date.getFullYear()
-    const finishDate = `${day}/${month}/${ year }`
-
-    await Client.findByIdAndUpdate(id,
-        {   tasks : [{ 
-            important,
-            date : finishDate,
-            state,
-            stateAcount,
-            isPrinter,
-            isExtrusion,
-            isDiary,
-            material,
-            size,
-            colors,
-            heads,
-            weight,
-            cuenta,
-            tratado,
-            client,
-            meters },...existClient.tasks]
-        } 
-    )
-    const updateClients = await Client.findById(id)
-    res.json(updateClients.tasks)
-})
 printerRouter.patch('/stateT/:id', async(req, res) => {
 
     const { id } = req.params
@@ -184,5 +119,67 @@ printerRouter.patch('/stateF/:id', async(req, res) => {
     const allPrinters = await Printer.find({})
 
     res.json(allPrinters)
+})
+printerRouter.patch('/edit/:id', async(req, res) => {
+
+    const {id} = req.params
+
+    const {
+        important = false,
+        state = false ,
+        material,
+        size,
+        colors,
+        heads,
+        weight,
+        meters,
+        client
+    } = req.body
+
+    const printer = await Printer.findById(id)
+
+    if(!printer){
+        res.status(404).json({
+            error : 'Tarea de impresion inexistente'
+        })
+    }
+    
+    const date = new Date()
+    const day = date.getDate()
+    const month = date.getMonth() + 1
+    const year = date.getFullYear()
+    const finishDate = `${day}/${month}/${ year }`
+
+    const newArr = { 
+        important,
+        date : finishDate,
+        state,
+        material,
+        size,
+        colors,
+        heads,
+        weight,
+        client,
+        meters 
+    }
+
+    console.log(newArr)
+
+    try {
+        
+        await Printer.findByIdAndUpdate(id, newArr, {new : true})
+    
+        const allPrinters = await Printer.find({})
+
+        res.json(allPrinters)
+
+    } catch (error) {
+        res.status(404).json({
+            "error" : "La tarea no se pudo actualizar"
+        })
+        console.log(error)
+    }
+
+
 })
 module.exports = printerRouter

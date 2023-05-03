@@ -57,72 +57,6 @@ extrusionRouter.post('/' ,[validarJWT], async (req, res) => {
         console.log(error)
     }
 })
-
-extrusionRouter.patch('/:id', async(req, res) => {
-    const {id} = req.params
-
-    const {
-        important = false,
-        state = false ,
-        stateAcount = false,
-        isPrinter = false,
-        isExtrusion = true,
-        isDiary = false,
-        material,
-        size,
-        colors,
-        heads,
-        weight,
-        meters,
-        cuenta,
-        tratado,
-        client
-    } = req.body
-    
-    if(isNaN(cuenta)){
-        return res.status(404).json({
-            error : 'La cuenta tiene que ser un numero'
-        })
-    }
-
-
-    const existClient = await Client.findById(id)
-
-    if(!existClient){
-        res.status(404).json({
-            error : 'Cliente inexistente'
-        })
-    }
-
-    const date = new Date()
-    const day = date.getDate()
-    const month = date.getMonth() + 1
-    const year = date.getFullYear()
-    const finishDate = `${day}/${month}/${ year }`
-
-    await Client.findByIdAndUpdate(id,
-        {   tasks : [{ 
-            important,
-            date : finishDate,
-            state,
-            stateAcount,
-            isPrinter,
-            isExtrusion,
-            isDiary,
-            material,
-            size,
-            colors,
-            heads,
-            weight,
-            cuenta,
-            tratado,
-            client,
-            meters },...existClient.tasks]
-        } 
-    )
-    const updateClients = await Client.findById(id)
-    res.json(updateClients.tasks)
-})
 extrusionRouter.delete('/:id', async(req, res) => {
 
     const { id } = req.params
@@ -178,5 +112,62 @@ extrusionRouter.patch('/stateF/:id', async(req, res) => {
     const allExtrusion = await Extrusion.find({})
 
     res.json(allExtrusion)
+})
+extrusionRouter.patch('/edit/:id', async(req, res) => {
+
+    const {id} = req.params
+
+    const {
+        important = false,
+        state = false ,
+        material,
+        tratado,
+        meters,
+        weight,
+        size,
+        client
+    } = req.body
+
+    const extrusion = await Extrusion.findById(id)
+
+    if(!extrusion){
+        res.status(404).json({
+            error : 'Tarea de extrusion inexistente'
+        })
+    }
+    
+    const date = new Date()
+    const day = date.getDate()
+    const month = date.getMonth() + 1
+    const year = date.getFullYear()
+    const finishDate = `${day}/${month}/${ year }`
+
+    const newArr = { 
+        important,
+        date : finishDate,
+        state,
+        material,
+        tratado,
+        meters,
+        weight,
+        size,
+        client
+    }
+    try {
+        
+        await Extrusion.findByIdAndUpdate(id, newArr, {new : true})
+    
+        const allExtrusions = await Extrusion.find({})
+
+        res.json(allExtrusions)
+
+    } catch (error) {
+        res.status(404).json({
+            "error" : "La tarea no se pudo actualizar"
+        })
+        console.log(error)
+    }
+
+
 })
 module.exports = extrusionRouter
