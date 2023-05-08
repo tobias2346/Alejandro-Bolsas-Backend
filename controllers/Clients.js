@@ -70,6 +70,7 @@ clientRouter.post('/' ,[validarJWT], async (req, res) => {
     
     const {
         title, 
+        phone,
         important = false
     } = req.body
 
@@ -112,6 +113,7 @@ clientRouter.post('/' ,[validarJWT], async (req, res) => {
 
     const newClient = new Client({ 
         title,
+        phone,
         important,
         date: new Date(),
         user: user.id

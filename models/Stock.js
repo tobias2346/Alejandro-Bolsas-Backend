@@ -4,12 +4,11 @@ const {Schema, model} = mongoose
 const stockSchemma = new Schema({
     title : String,
     important: Boolean,
-    tasks : [{
+    date: String,
+    individualStock : [{
         date: String,
         important: Boolean,
-        size: String,
-        total : Number
-    }]
+        weight: Number }]
 })
 
 stockSchemma.set('toJSON', {
