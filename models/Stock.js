@@ -8,7 +8,10 @@ const stockSchemma = new Schema({
     individualStock : [{
         date: String,
         important: Boolean,
-        weight: Number }]
+        stateDiscount : Boolean,
+        aditionalText : String,
+        weightStock: [],
+         }]
 })
 
 stockSchemma.set('toJSON', {

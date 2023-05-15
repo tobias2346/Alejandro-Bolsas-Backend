@@ -12,6 +12,7 @@ stockRouter.get('/', async(req, res) => {
             error : 'no hay ningun stock anotado'
         })
     }
+
     res.json(stock)
 })
 stockRouter.post('/' ,[validarJWT], async (req, res) => {
@@ -57,7 +58,7 @@ stockRouter.post('/' ,[validarJWT], async (req, res) => {
     const newStock = new Stock({ 
         title,
         important,
-        date: finishDate,
+        date: finishDate
     })
 
 

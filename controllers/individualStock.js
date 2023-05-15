@@ -2,11 +2,10 @@ const individualStockRouter = require('express').Router()
 const Stock = require('../models/Stock')
 
 individualStockRouter.get('/:id' , async(req, res) => {
-//el id es de la agrupacion del stock
-
     const {id} = req.params
 
     const stock = await Stock.findById(id)
+
 
     if( !stock ){
         res.status(404).json({
@@ -15,21 +14,16 @@ individualStockRouter.get('/:id' , async(req, res) => {
     }
 
     res.json(stock)
-
 })
-individualStockRouter.patch('/:id', async(req, res) => {
+individualStockRouter.patch('/discountF/:id', async(req, res) => {
 
     const {id} = req.params
 
-    const {
-        important = false,
-        weight} = req.body
+    const { 
+        important = false, 
+        stateDiscount = false
+     } = req.body
 
-    if(isNaN(weight) || !weight){
-        return res.status(404).json({
-            error : 'El peso es obligatorio y tiene que ser un numero'
-        })
-    }
     const stock = await Stock.findById(id)
 
     if(!stock){
@@ -37,164 +31,78 @@ individualStockRouter.patch('/:id', async(req, res) => {
             error : 'Stock inexistente'
         })
     }
+
     const date = new Date()
     const day = date.getDate()
     const month = date.getMonth() + 1
     const year = date.getFullYear()
     const finishDate = `${day}/${month}/${ year }`
   
-
     await Stock.findByIdAndUpdate(id,
         {   individualStock : [{ 
             important,
             date : finishDate,
-            weight},...stock.individualStock]
+            stateDiscount
+            },...stock.individualStock]
         }
     )
     const updateStock = await Stock.findById(id)
 
+    res.json(updateStock)
+})
+individualStockRouter.patch('/discountT/:id', async(req, res) => {
 
+    const {id} = req.params
+
+    const { 
+        important = false, 
+        stateDiscount = true,
+        aditionalText
+     } = req.body
+
+    const stock = await Stock.findById(id)
+
+    if(!stock){
+         return res.status(404).json({
+            error : 'Stock inexistente'
+        })
+    }
+
+    const date = new Date()
+    const day = date.getDate()
+    const month = date.getMonth() + 1
+    const year = date.getFullYear()
+    const finishDate = `${day}/${month}/${ year }`
+  
+    await Stock.findByIdAndUpdate(id,
+        {   individualStock : [{ 
+            important,
+            date : finishDate,
+            stateDiscount,
+            aditionalText
+            },...stock.individualStock]
+        }
+    )
+    const updateStock = await Stock.findById(id)
 
     res.json(updateStock)
 })
-// taskRouter.patch('/discount/:id', async(req, res) => {
-//     const {id} = req.params
+individualStockRouter.patch('/delete/:i/:id', async(req, res) => {
 
-//     const {
-//         stateAcount = true,
-//         cuenta
-//     } = req.body
+    const {id, i} = req.params
 
-//     if(isNaN(cuenta)){
-//         return res.status(404).json({
-//             error : 'La cuenta tiene que ser un numero'
-//         })
-//     }
+    const stock = await Stock.findById(id)
 
-//     const date = new Date()
-//     const day = date.getDate()
-//     const month = date.getMonth() + 1
-//     const year = date.getFullYear()
-//     const finishDate = `${day}/${month}/${ year }`
+    if(!stock){
+         return res.status(404).json({
+            error : 'Stock inexistente'
+        })
+    }
 
-//     const existClient = await Client.findById(id)
+    stock.individualStock.splice( i , 1)
 
-//     if(!existClient){
-//         res.status(404).json({
-//             error : 'Cliente inexistente'
-//         })
-//     }
-//     await Client.findByIdAndUpdate(id,
-//         {   tasks : [{ 
-//             stateAcount,
-//             date : finishDate,
-//             cuenta},...existClient.tasks]
-//         }
-//     )
-//     const updateClients = await Client.findById(id)
+    await stock.save()
 
-//     res.json(updateClients.tasks)
-// })
-// taskRouter.patch('/delete/:clientId/:i', async(req, res) => {
-//     const { clientId, i} = req.params
-
-//     const client = await Client.findById(clientId)
-
-//     if(!client){
-//         res.status(404).json({
-//             error : 'Cliente inexistente'
-//         })
-//     }
-
-//     client.tasks.splice( i, 1 )
-
-//     console.log(client.tasks)
-
-//     await client.save()
-
-//     res.json(client.tasks)
- 
-// })
-// taskRouter.patch('/edit/:clientId/:i', async(req, res) => {
-
-//     const {clientId ,i} = req.params
-
-//     const {
-//         important = false,
-//         state = false ,
-//         stateAcount = false,
-//         isPrinter = false,
-//         isExtrusion = false,
-//         material,
-//         size,
-//         colors,
-//         heads,
-//         weight,
-//         meters,
-//         cuenta,
-//         tratado,
-//         client
-//     } = req.body
-    
-//     if(isNaN(cuenta)){
-//         return res.status(404).json({
-//             error : 'La cuenta tiene que ser un numero'
-//         })
-//     }
-//     if( !client || !material || !size || !meters || !cuenta){
-//         return res.status(404).json({
-//             error : 'Algunos campos son obligatorios'
-//         })
-//     }
-
-//     const existClient = await Client.findById(clientId)
-
-//     if(!existClient){
-//         res.status(404).json({
-//             error : 'Cliente inexistente'
-//         })
-//     }
-    
-//     const date = new Date()
-//     const day = date.getDate()
-//     const month = date.getMonth() + 1
-//     const year = date.getFullYear()
-//     const finishDate = `${day}/${month}/${ year }`
-
-//     const newArr = [...existClient.tasks]
-
-//     newArr[i] = { 
-//         important,
-//         date : finishDate,
-//         state,
-//         stateAcount,
-//         isPrinter,
-//         isExtrusion,
-//         isDiary : true,
-//         material,
-//         size,
-//         colors,
-//         heads,
-//         weight,
-//         cuenta,
-//         tratado,
-//         client,
-//         meters 
-//     }
-
-//     try {
-        
-//     await Client.findByIdAndUpdate(clientId, {tasks : newArr})
-
-//     } catch (error) {
-//         res.status(404).json({
-//             "error" : "La tarea no se pudo actualizar"
-//         })
-//         console.log(error)
-//     }
-//     const updateClients = await Client.findById(clientId)
-
-//     res.json(updateClients.tasks)
-
-// })
+    res.json(stock)
+})
 module.exports = individualStockRouter

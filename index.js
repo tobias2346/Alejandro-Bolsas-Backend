@@ -13,6 +13,8 @@ const extrusionRouter = require('./controllers/Extrusions')
 const cutRouter = require('./controllers/Cuts')
 const diaryRouter = require('./controllers/Diarys')
 const individualStockRouter = require('./controllers/individualStock')
+const weightStockRouter = require('./controllers/stockWeight')
+
 app.use(cors())
 app.use(express.json())
 app.use(logger)
@@ -35,7 +37,9 @@ app.use('/api/diary', diaryRouter)
 
 app.use('/api/stock', stockRouter)
 
-app.use('/api/stockGroup', individualStockRouter)
+app.use('/api/individualStock', individualStockRouter)
+
+app.use('/api/weightStock', weightStockRouter)
 
 app.use(finalError)
 
